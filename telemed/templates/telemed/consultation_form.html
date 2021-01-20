@@ -1,0 +1,233 @@
+{% extends "telemed/sidebar.html" %}
+
+
+{% block content %}
+<title>TELEMED - Consultation Form</title>
+
+<!--START OF CONTAINER FOR CONSULTATION FORM-->
+<div class = "container consultation-form" style="width: 80%;">
+	<br>
+	<h3 class = "bodyHeader" style = "color: black; text-align: center">  TELEMEDICINE CONSULTATION FORM </h3>
+	<br>
+
+	<form method="POST" enctype="multipart/form-data">
+	{% csrf_token %}
+
+		<!-- consultation date and time -->
+		<div class="row">
+		{% for field in form.visible_fields|slice:"9:10" %}
+			<div class="col">
+				<div class = "form-group" style="margin-left: 40px;">
+					<label class = "consult_labels font-weight-bold">{{field.label}}</label><br>
+					{% if request.user.groups.all.0.name == "Patient" %}
+						{{field.value}}
+					{% else %}
+						{{field}}
+					{% endif %}
+				</div>
+			</div>
+		{% endfor %}
+		{% for field in form.visible_fields|slice:"10:11" %}
+			<div class="col">
+				<div class = "form-group" style="margin-right: 40px;">
+					<label class = "consult_labels font-weight-bold">{{field.label}}</label><br>
+					{% if request.user.groups.all.0.name == "Patient" %}
+						{{ field.value }}
+					{% else %}
+						{{field}}
+					{% endif %}
+				</div>
+			</div>
+		{% endfor %}
+		</div>
+
+		<!-- patient document -->
+		{% for field in form.visible_fields|slice:"0:1" %}
+			<div class = "form-group" style="margin-left: 40px; margin-right: 40px;">
+				{% if request.user.groups.all.0.name == "Patient" %} 
+				<label class = "consult_labels font-weight-bold"> {{field.label}}
+					<span style="color:red;"> *</span><span class="font-weight-normal">(only pdf files are allowed)</span>
+				</label>
+					<a href="#" onclick="toggle_visibility('pd_upload_div', 'cancel_upload', 'change_upload', 'pd_upload');" id="cancel_upload" style="display:none">Cancel</a>
+					<br> 
+					{% if field.value != "" %}
+						<p id="change_upload">
+							{{ field.value }}
+							<a href="#" onclick="toggle_visibility('pd_upload_div', 'cancel_upload', 'change_upload', 'pd_upload');" > Change </a>
+						</p> 
+					{% endif %}
+				    <div id="pd_upload_div" {% if field.value != "" %} style="display:none" {%endif%}>
+				    	<input type="file" id="pd_upload" name="pd_upload" class="form-control" onchange="return fileValidation('pd_upload')"/>
+				    </div>
+			    {% else %}
+			    	{% if field.value != "" %}
+						<label class = "consult_labels font-weight-bold"> {{field.label}}
+						<a href="/download{{ field.value.url }}">(download</a> or
+						<a href="/view{{ field.value.url }}">view)</a>
+					{% endif %}
+				{% endif %}
+			</div>
+		{% endfor %}
+
+		<!-- current medication -->
+		{% for field in form.visible_fields|slice:"1:2" %}
+		<div class = "form-group" style="margin-left: 40px; margin-right: 40px;">
+			<label class = "consult_labels font-weight-bold">{{field.label}}</label><br>
+			{{field}}
+		</div>
+		{% endfor %}
+
+		<!-- temperature -->
+		{% for field in form.visible_fields|slice:"2:3" %}
+		<div class = "form-group" style="margin-left: 40px; margin-right: 40px;">
+			<label class = "consult_labels font-weight-bold">{{field.label}} (in Celcius)</label><br>
+			{{field}}
+		</div>
+		{% endfor %}
+
+		<!-- allergies -->
+		{% for field in form.visible_fields|slice:"3:4" %}
+		<div class = "form-group" style="margin-left: 40px; margin-right: 40px;">
+			<label class = "consult_labels font-weight-bold">{{field.label}}</label><br>
+			{{field}}
+		</div>
+		{% endfor %}
+
+		<!-- presenting problems, assessments, plan -->
+		{% for field in form.visible_fields|slice:"4:7" %}
+			<div class = "form-group" style="margin-left: 40px; margin-right: 40px;">
+				{% if request.user.groups.all.0.name == "Patient" and field.value != "" %}
+					<label class = "consult_labels font-weight-bold">{{field.label}}</label><br>
+					{{field.value}}
+				{% endif %}
+				{% if request.user.groups.all.0.name == "Physician" %}
+					<label class = "consult_labels font-weight-bold">{{field.label}}</label><br>
+					{{field}}
+				{% endif %}
+			</div>
+		{% endfor %}
+		
+		<!-- prescription -->
+		{% for field in form.visible_fields|slice:"8:9" %}
+			<div class = "form-group" style="margin-left: 40px; margin-right: 40px;">
+				{% if request.user.groups.all.0.name == "Physician" %}
+					<label class = "consult_labels font-weight-bold">{{field.label}}
+						<span style="color:red;"> *</span><span class="font-weight-normal">(only pdf files are allowed)</span>
+					</label>
+					<a href="javascript:void(0)" onclick="toggle_visibility('pres_upload_div', 'cancel_upload_pres', 'change_upload_pres', 'pres_upload');" id="cancel_upload_pres" style="display:none">Cancel</a>
+					<br>
+
+					{% if field.value != "" %}
+					<p id="change_upload_pres">
+						{{ field.value }}
+						<a href="javascript:void(0)" onclick="toggle_visibility('pres_upload_div', 'cancel_upload_pres', 'change_upload_pres', 'pres_upload');" > Change </a>
+					</p>
+				    {% endif %}
+
+					<div id="pres_upload_div" {% if field.value != "" %} style="display:none" {%endif%}>
+				    	<input type="file" id="pres_upload" name="pres_upload" class="form-control" onchange="return fileValidation('pres_upload')"/>
+				    </div> 
+			    {% else %}
+				    {% if field.value != "" %}
+						<label class = "consult_labels font-weight-bold"> {{field.label}}
+						<a href="/download{{ field.value.url }}">(download</a> or
+						<a href="/view{{ field.value.url }}">view)</a>
+					{% endif %}
+				{% endif %}
+			</div>
+		{% endfor %}
+
+		<!-- lab request -->
+		{% for field in form.visible_fields|slice:"7:8" %}
+			<div class = "form-group" style="margin-left: 40px; margin-right: 40px;">
+				{% if request.user.groups.all.0.name == "Physician" %}
+					<label class = "consult_labels font-weight-bold">{{field.label}}
+						<span style="color:red;"> *</span><span class="font-weight-normal">(only pdf files are allowed)</span>
+					</label>
+					<a href="javascript:void(0)" onclick="toggle_visibility('lr_upload_div', 'cancel_upload_lr', 'change_upload_lr', 'lr_upload');" id="cancel_upload_lr" style="display:none">Cancel</a>
+					<br>
+
+					{% if field.value != "" %}
+					<p id="change_upload_lr">
+						{{ field.value }}
+						<a href="javascript:void(0)" onclick="toggle_visibility('lr_upload_div', 'cancel_upload_lr', 'change_upload_lr', 'lr_upload');" > Change </a>
+					</p>
+				    {% endif %}
+
+					<div id="lr_upload_div" {% if field.value != "" %} style="display:none" {%endif%}>
+				    	<input type="file" id="lr_upload" name="lr_upload" class="form-control" onchange="return fileValidation('lr_upload')"/>
+				    </div> 
+				{% else %}
+				    {% if field.value != "" %}
+						<label class = "consult_labels font-weight-bold"> {{field.label}}
+						<a href="/download{{ field.value.url }}">(download</a> or
+						<a href="/view{{ field.value.url }}">view)</a>
+					{% endif %}
+				{% endif %}
+			</div>
+		{% endfor %}
+
+		<!-- next consultation date -->
+		{% for field in form.visible_fields|slice:"11:12" %}
+		<div class = "form-group" style="margin-left: 40px; margin-right: 40px;">
+			{% if request.user.groups.all.0.name == "Patient" and field.value != None %}
+				<label class = "consult_labels font-weight-bold">{{field.label}}</label><br>
+				{{field.value}}
+			{% endif %}
+			{% if request.user.groups.all.0.name == "Physician" %}
+				<label class = "consult_labels font-weight-bold">{{field.label}}</label><br>
+				{{field}}
+			{% endif %}
+		</div>
+		{% endfor %}
+
+		<br>
+		<div class="text-center">
+			<button type="submit" class="btn btn-dark" name="canceleditrecord"> Cancel </button>&emsp;
+			<button type="reset" class="btn btn-warning"> Reset </button>&emsp;
+			<button type="submit" class="btn btn-primary" name="editrecord"> Submit </button>
+		</div>
+		<br>
+
+	</form>
+
+</div>
+
+
+
+<script>
+
+	// validate file type (real time) 
+    function fileValidation(id) { 
+        var fileInput = document.getElementById(id); 
+        var filePath = fileInput.value; 
+        // Allowing file type 
+        var allowedExtensions =  /(\.pdf)$/i; 
+        if (!allowedExtensions.exec(filePath)) { 
+            alert('Invalid file type! Only pdf files are allowed.'); 
+            fileInput.value = ''; 
+            return false; 
+        }  
+    } 
+
+	// changing upload
+	function toggle_visibility(id1, id2, id3, id4) {
+		var e = document.getElementById(id1);
+		var change_btn = document.getElementById(id3);
+		var cancel_btn = document.getElementById(id2);
+		var fileInput = document.getElementById(id4); 
+		if(e.style.display == 'block'){
+			e.style.display = 'none';
+			cancel_btn.style.display = 'none';
+			change_btn.style.display = 'inline';
+			fileInput.value = ''; 
+		}else{
+			e.style.display = 'block';
+			cancel_btn.style.display = 'inline';
+			change_btn.style.display = "none";
+		}
+	}
+</script>
+
+{% endblock %}
+

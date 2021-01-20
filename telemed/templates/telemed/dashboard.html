@@ -1,0 +1,249 @@
+{% extends "telemed/sidebar.html" %}
+
+{% load static %}
+
+{% block content %} 
+		<title>TELEMED - Dashboard</title>
+		
+		<!-- 		Only physician has access to this 		 -->
+    	{% if request.user.groups.all.0.name == "Physician" and request.user.physician.application_status == True %}
+
+			<div class="main">
+				<br>
+				<div class="row">
+					<div class="col">
+						<div class="card bg-warning">
+						    <div class="card-body text-center">
+						    	<img src="http://www.entypo.com/images/users.svg" width="50">
+						      	<p class="card-text"><a style="color:white; text-decoration:none;" href="{% url 'physician_patient_list' %}"><span>Patients Under You</span></a></p>
+						    </div>
+						</div>
+					</div>
+					<div class="col">
+						<div class="card bg-warning">
+						    <div class="card-body text-center">
+						    	<h1>5</h1>
+						      	<p class="card-text" style="color: white;"><span>Current Number of Patients</span></p>
+						    </div>
+						</div>
+					</div>
+				</div>
+
+				<br>
+
+				<div style="background-color: #17a2e8; color: white; text-align: center; font-size: 120%; padding: 5px" > Consultation Requests </div>
+
+				<br>
+				{% if patient_requests|length != 0 %}
+				<div class="table-responsive">
+					<table class="table table-hover" id="dev-table">
+					<thead>
+						<tr>
+						<th>Name</th>
+						<th>Mobile</th>
+						<th>Landline</th>
+						<th>Address</th>
+						<th></th>
+						<th></th>
+
+						</tr>
+					</thead>
+						{% for d in patient_requests %} 
+						<tr>
+							<td> {{d.get_name}} </td>
+							<td> {{d.mobile}} </td>
+							<td> {{d.landline}} </td>
+							<td> {{d.address}} </td>
+							<td>
+								<a class="btn btn-success" href="{% url 'confirm-consultation' pk=d.patientID  %}">Confirm</a>
+							</td>
+							<td>
+								<a class="btn btn-danger" href="{% url 'reject-consultation' pk=d.patientID  %}">Delete</a>
+							</td>
+								
+						{% endfor %}
+
+						</tr>
+					</table>
+				</div>
+				<!-- end of table-reponsive -->
+				{% else %}
+				
+				<div class="container text-center">
+					<br><br><br><br>
+					<h5> No Consultation Requests </h5>
+				</div>
+
+				{% endif %}
+				
+			</div>
+			
+
+
+
+			
+		
+
+
+		<!-- 		Only patient has access to this 		 -->
+        {% elif request.user.groups.all.0.name == "Patient" and request.user.patient.application_status == True %}
+        <div class="main">
+
+			<br>
+			{% if request.user.patient.assigned_doctor_approve %}
+
+			<div style="background-color: #17a2e8; color: white; text-align: center; font-size: 120%; padding: 5px" > ASSIGNED DOCTOR </div>
+
+			<br>
+
+			<div class="table-responsive">
+				<table class="table table-hover" id="dev-table">
+				<thead>
+					<tr>
+					<th>Name</th>
+					<th>Specialization</th>
+					<th>Mobile</th>
+					<th>Landline</th>
+					<th>Address</th>
+
+					</tr>
+				</thead>
+					{% for d in assigned_doctor %} 
+					<tr>
+						<td> {{d.get_name}} </td>
+						<td> {{d.specialization}} </td>
+						<td> {{d.mobile}} </td>
+						<td> {{d.landline}} </td>
+						<td> {{d.address}} </td>
+					</tr>	
+					{% endfor %}
+
+					</tr>
+				</table>
+			</div>
+			<!-- end of table-reponsive -->
+
+			{% else %}
+
+			<div style="background-color: #17a2e8; color: white; text-align: center; font-size: 120%; padding: 5px" > TELEMED DOCTORS </div>
+
+			<br>
+
+			<div class="table-responsive">
+				<table class="table table-hover" id="dev-table">
+				<thead>
+					<tr>
+					<th>Name</th>
+					<th>Specialization</th>
+					<th>Hospital Affiliations</th>
+					<th>Mobile</th>
+					<th></th>
+
+					</tr>
+				</thead>
+					{% for d in available_doctors %} 
+					<tr>
+						<td> {{d.get_name}} </td>
+						<td> {{d.specialization}} </td>
+						<td> {{d.hospital_affiliation}} </td>
+						<td> {{d.mobile}} </td>
+						<td><a class="btn btn-primary btn-xs" href="{% url 'ask-consultation' d.physicianID  %}"><span>Ask for Consultation</span></a></td>
+							
+					{% endfor %}
+
+					</tr>
+				</table>
+			</div>
+			<!-- end of table-reponsive -->
+
+			{% endif %}
+		</div>
+
+		{% elif request.user.physician.application_status == False or request.user.patient.application_status == False %}
+
+		<div class="container text-center">
+			<img width="200" src="{% static '/images/processing.png' %}">
+			<br><br><br><br>
+			<h3> Your registration is being processed. </h3>
+
+		</div>
+
+		{% endif %}
+
+
+		{% if request.user.groups.all.0.name == "System Admin" %}
+		<br>
+			<h1 class="panel-title" style ="text-align:center; color:white" ><span class = "label label-success">Welcome Admin!</span></h1>
+			<br><br>
+			<div class="row">
+				<div class="panel panel-primary col-md-5" style="margin-left:4%;">
+					<div class="panel-heading" style="text-align:center;">
+						<h4 class="panel-title">Physicians</h4>
+					</div>
+
+					<div>
+						<table class="table table-hover" id="dev-table">
+						<thead>
+							<tr>
+							<th>Name</th>
+							<th>Status</th>
+
+							</tr>
+						</thead>
+							{% for d in doctors %} 
+							<tr>
+								<td> {{d.get_name}} </td>
+									{% if d.application_status %} 
+								<td> <span class="label label-success">Approved</span></td>
+									{% else %}  
+								<td> <span class="label label-warning">Pending</span></td> 
+									{% endif %} 
+							{% endfor %}
+
+							</tr>
+						</table>
+					</div>
+					<!-- end of table-reponsive -->
+				</div>
+
+				<div class="panel panel-primary col-md-5" style="margin-left:6%;">
+					<div class="panel-heading" style="text-align:center;">
+						<h4 class="panel-title">Patients</h4>
+					</div>
+					<div>
+						<table class="table table-hover" id="dev-table">
+						<thead>
+							<tr>
+							<th>Name</th>
+							<th>Status</th>
+
+							</tr>
+						</thead>
+						
+						{% for p in patients %} 
+						<tr>
+							<td> {{p.get_name}} </td>
+								{% if p.application_status %} 
+							<td> <span class="label label-success">Approved</span></td> 
+								{% else %} 
+							<td> <span class="label label-warning">Pending</span></td>
+								{% endif %} 
+
+						</tr>
+						{% endfor %} 
+
+						</table>
+					</div>
+					<!-- end of table-responsive -->
+				</div>
+			</div> 
+			<!-- end of row  -->
+		</div> <!-- end of market-updates -->
+
+		{% endif %}
+
+
+
+
+
+{% endblock %}

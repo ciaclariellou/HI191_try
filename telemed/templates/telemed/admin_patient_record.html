@@ -1,0 +1,111 @@
+{% extends "telemed/sidebar.html" %}
+
+
+{% block content %}
+
+    <title>TELEMED - Patient Record</title>
+     <!-- DIV-->
+    <div class="container">
+
+      {% if patients %}
+        
+        <div >
+          <h3 style ="text-align:center">Patient Record</h3>
+        </div>
+
+        <table class="table table-hover" id="dev-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Mobile</th>
+              <th>Address</th>
+              <th>Actions</th>
+              <th></th>
+            </tr>
+          </thead>
+          
+          {% for p in patients %} 
+          <tr>
+            <td> {{p.get_name}} </td>
+            <td> {{p.mobile}} </td>
+            <td> {{p.address}} </td>
+            <td>
+              <!-- Deactivate modal trigger -->
+              <button type="button" class="btn btn-info" data-toggle="modal" data-target="#deactModal{{p.patientID}}">
+                Deactivate
+              </button>
+              <!-- Delete modal trigger -->
+              <button type="button" class="btn btn-danger " data-toggle="modal" data-target="#deleteModal{{p.patientID}}">
+                Delete
+              </button>
+            </td>
+          </tr>
+
+          <!-- Deactivate modal -->
+          <div class="modal fade" id="deactModal{{p.patientID}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLongTitle">Account Deactivation</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  Are you sure you want to continue?
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                  <a class="btn btn-danger btn-xs" href="{% url 'deactivate_patient' p.patientID %}"><span>Continue</span></a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Delete modal -->
+          <div class="modal fade" id="deleteModal{{p.patientID}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLongTitle">Account Deletion</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  Are you sure you want to continue?
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                  <a class="btn btn-danger btn-xs" href="{% url 'delete_patient' p.patientID %}"><span>Continue</span></a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {% endfor %}
+
+        </table>
+
+      {% else %}
+      <div >
+        <h3 style ="text-align:center">NO RECORD</h3>
+      </div>
+      {% endif%}
+
+    </div>
+
+    <!-- END OF DIV-->
+
+    <!-- bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+
+    <!-- END OF DIV -->
+
+ 
+
+{% endblock %}
